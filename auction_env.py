@@ -45,7 +45,7 @@ class Auction(Environment):
         agent_ids = jax.nn.one_hot(jnp.arange(self.num_agents), self.num_agents)
         winning_id = jnp.int32(-1).repeat(self.num_agents).reshape(self.num_agents, 1)
         winning_bid = jnp.float32(-1).repeat(self.num_agents).reshape(self.num_agents, 1)
-        observation = jnp.concatenate([agent_ids, winning_id, winning_bid], axis=-1)
+        observation = jnp.concatenate([state.valuations.reshape(self.num_agents, 1), agent_ids, winning_id, winning_bid], axis=-1)
         # Include private valuations in the extras field
         extras = {"valuations": state.valuations}
         # Create the initial TimeStep
@@ -99,7 +99,7 @@ class Auction(Environment):
         agent_ids = jax.nn.one_hot(jnp.arange(self.num_agents), self.num_agents)
         winning_id = winner_index.repeat(self.num_agents).reshape(self.num_agents, 1)
         winning_bid = max_bid.repeat(self.num_agents).reshape(self.num_agents, 1)
-        new_observation = jnp.concatenate([agent_ids, winning_id, winning_bid], axis=-1)
+        new_observation = jnp.concatenate([state.valuations.reshape(self.num_agents, 1), agent_ids, winning_id, winning_bid], axis=-1)
 
         # Compute the discount factor
         discount = jnp.ones_like(rewards) * (1 - done)
@@ -114,7 +114,7 @@ class Auction(Environment):
         return next_state, timestep
 
     def observation_spec(self) -> Spec:
-        return Array((self.num_agents, self.num_agents + 2), dtype=jnp.float32, name="observation")
+        return Array((self.num_agents, self.num_agents + 3), dtype=jnp.float32, name="observation")
     
     def action_spec(self) -> Spec:
         return Array((self.num_agents,), dtype=jnp.float32, name="bids")
