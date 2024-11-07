@@ -14,7 +14,7 @@ The auction environment simulates the following:
 - **Winner Determination**: The agent with the highest bid wins the auction round. In case of a tie, the agent with the lowest index wins.
 - **Rewards**: The winning agent receives a reward equal to their valuation minus their bid. Other agents receive zero reward.
 - **Cumulative Utility**: Agents accumulate utility over multiple rounds.
-- **Observation**: After each round, agents observe the winning agent's index and the winning bid amount.
+- **Observation**: After each round, agents observe their own index, the winning agent's index and the winning bid amount.
 
 ### Running the Auction
 

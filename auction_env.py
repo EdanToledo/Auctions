@@ -41,8 +41,11 @@ class Auction(Environment):
             cumulative_utility=jnp.zeros_like(valuations),
             step_no=0
         )
-        # Initial dummy observation (no winner and bid yet)
-        observation = (jnp.int32(-1), jnp.float32(-1))
+        # Initial dummy observation (agent indices, winner index and winner bid)
+        agent_ids = jax.nn.one_hot(jnp.arange(self.num_agents), self.num_agents)
+        winning_id = jnp.int32(-1).repeat(self.num_agents).reshape(self.num_agents, 1)
+        winning_bid = jnp.float32(-1).repeat(self.num_agents).reshape(self.num_agents, 1)
+        observation = jnp.concatenate([agent_ids, winning_id, winning_bid], axis=-1)
         # Include private valuations in the extras field
         extras = {"valuations": state.valuations}
         # Create the initial TimeStep
@@ -93,7 +96,10 @@ class Auction(Environment):
         )
 
         # Prepare the observation for the next step
-        new_observation = (winner_index, max_bid)
+        agent_ids = jax.nn.one_hot(jnp.arange(self.num_agents), self.num_agents)
+        winning_id = winner_index.repeat(self.num_agents).reshape(self.num_agents, 1)
+        winning_bid = max_bid.repeat(self.num_agents).reshape(self.num_agents, 1)
+        new_observation = jnp.concatenate([agent_ids, winning_id, winning_bid], axis=-1)
 
         # Compute the discount factor
         discount = jnp.ones_like(rewards) * (1 - done)
@@ -108,7 +114,7 @@ class Auction(Environment):
         return next_state, timestep
 
     def observation_spec(self) -> Spec:
-        return tuple(Array((), dtype=jnp.int32, name="winning_agent"), Array((), dtype=jnp.float32, name="winning_bid"))
+        return Array((self.num_agents, self.num_agents + 2), dtype=jnp.float32, name="observation")
     
     def action_spec(self) -> Spec:
         return Array((self.num_agents,), dtype=jnp.float32, name="bids")
@@ -148,3 +154,30 @@ class Auction(Environment):
             print("\nNo bids have been submitted yet.")
 
         print("========================\n")
+        
+        
+if __name__ == "__main__":
+    
+    def run_auction():
+        # Initialize random key
+        key = jax.random.PRNGKey(0)
+        # Create an Auction environment
+        env = Auction(num_agents=3, num_rounds=2, max_valuation=10.0)
+        
+        # Reset the environment
+        state, timestep = env.reset(key)
+        
+        # Render the initial state
+        env.render(state)
+        
+        # Agents submit bids for the first round
+        bids_round_1 = jnp.array([5.0, 7.0, 6.0])
+        state, timestep = env.step(state, bids_round_1)
+        env.render(state, bids_round_1)
+        
+        # Agents submit bids for the second round
+        bids_round_2 = jnp.array([8.0, 5.0, 7.0])
+        state, timestep = env.step(state, bids_round_2)
+        env.render(state, bids_round_2)
+        
+    run_auction()
