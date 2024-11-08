@@ -1,6 +1,6 @@
 # Auction Environment
 
-Welcome to the **Auction Environment**! This is a reinforcement learning environment simulating a multi-agent auction game, built using [JAX](https://github.com/google/jax) and [Jumanji](https://github.com/instadeepai/jumanji). Agents participate in sequential auctions, bidding against each other to maximize their utilities based on private valuations given by a uniform distribution. Valuations of each agent remain constant for all rounds.
+This is a reinforcement learning environment simulating a multi-agent auction game, built using [JAX](https://github.com/google/jax) and [Jumanji](https://github.com/instadeepai/jumanji). Agents participate in sequential round auctions, bidding against each other to maximize their utilities based on private valuations given by a uniform distribution. Valuations of each agent remain constant for all rounds.
 
 ## Usage
 
